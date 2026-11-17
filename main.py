@@ -6,8 +6,12 @@ cash. Two legs, because the two published dev windows reward different dips:
 
   - Leg A (shallow dip, regime-gated): the lowest close of the last 360 bars
     (6h) was set within the last 20 bars, the latest close is >= 0.4% above
-    that low, AND the trailing 360-bar return is >= -0.7% (the window is
-    flat or rising, not a downtrend). Take-profit +1.7%.
+    that low, AND the trailing 360-bar return is >= -0.8% (the window is
+    flat or rising, not a downtrend). Take-profit +1.7%. (R12: -0.8% is the
+    loosest gate that keeps the previous window's leg-A losers out -- -0.9%
+    lets one in -- and it is the only gate value with all three published
+    windows positive; it also doubles the slack vs this window's trade,
+    whose trailing 360-bar return is -0.60%.)
   - Leg B (deep V, always on): the lowest close of the last 720 bars (12h)
     was set within the last 60 bars, the latest close is >= 0.6% above that
     low, AND that low sits >= 6.5% below the highest close of the same 720
@@ -29,7 +33,10 @@ latest close, so a gap open never fills the bot at a silly price.
 The exit bookkeeping (cooldown start, peak reset) applies only once the
 sell's fill is confirmed in the next batch: a rejected sell leaves the peak
 and the entry bar intact, so the exit conditions are re-evaluated on the next
-bar instead of the exit latching.
+bar instead of the exit latching. While a sell is out and unacknowledged,
+no second sell is sent for the same position: the next batch always reports
+the fill or rejection, which settles the pending sell before any new order
+is decided.
 
 Why this shape: on 1-minute cbBTC bars the price moves in tiny steps
 (median |1m move| ~3 bps) while a full-size round trip costs ~26 bps in fees,
@@ -74,7 +81,7 @@ SYMBOL = "CBBTC"
 LEG_A_LOOKBACK_BARS = 360
 LEG_A_LOW_WITHIN_BARS = 20
 LEG_A_BOUNCE_PER_MILLE = 4       # entry: close >= low * 1004 / 1000 (+0.4%)
-LEG_A_REGIME_PER_MILLE = -7      # entry: trailing 360-bar return >= -0.7%
+LEG_A_REGIME_PER_MILLE = -8      # entry: trailing 360-bar return >= -0.8%
 LEG_A_TAKE_PROFIT_PER_MILLE = 17  # exit: value >= cost * 1017 / 1000 (+1.7%)
 # Leg B: deep V, always on.
 LEG_B_LOOKBACK_BARS = 720
@@ -279,6 +286,15 @@ def on_batch(state, batch):
     held = state.positions.get(SYMBOL)
     if held is not None:
         BOT.ever_traded = True
+        if BOT.pending_sell_id is not None:
+            # A sell is already out and unacknowledged: its fill (or
+            # rejection) arrives in the next batch and is settled in
+            # reconcile_sell() above. Never send a second sell for the
+            # same position while one is pending -- a batch that arrived
+            # without the expected fill record must not turn into a
+            # duplicate live sell. (The protocol reports every fill in
+            # the next batch, so this waits at most one bar in practice.)
+            return []
         if BOT.exit_signal(state):
             # Send the sell but do NOT reset the exit bookkeeping yet: it
             # applies in reconcile_sell() once the fill is confirmed. The
