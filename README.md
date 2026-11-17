@@ -1,5 +1,9 @@
 # Two-Leg V-Bounce Bot — make.fun btc-race-24h-20261117-0603
 
+[![make.fun · btc-race-24h-20261117-0603](https://make.fun/badge/btc-race-24h-20261117-0603.svg)](https://make.fun/bounty/btc-race-24h-20261117-0603?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261117-0603)
+[![rank](https://make.fun/badge/btc-race-24h-20261117-0603/melatim80186/makefun-btc-race-24h-20261117-0603/rank.svg)](https://make.fun/bounty/btc-race-24h-20261117-0603/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261117-0603)
+[![reward](https://make.fun/badge/btc-race-24h-20261117-0603/melatim80186/makefun-btc-race-24h-20261117-0603/reward.svg)](https://make.fun/bounty/btc-race-24h-20261117-0603?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261117-0603)
+
 A BTC trading bot for the [make.fun](https://make.fun) `btc-race-24h-20261117-0603`
 contest: it trades Coinbase Wrapped BTC (cbBTC) against USDC on 1-minute
 on-chain bars, starting with $1,000 of paper money, for the highest net PnL
@@ -47,9 +51,19 @@ The bot beats every house baseline by a clear margin.
 
 Two runs of the wire-protocol driver on the same bars are byte-identical.
 
+## Run it
+
+```sh
+python3 main.py
+```
+
 ## Files
 
 - `main.py` — the bot (Python 3.13, standard library only; integer math,
   no floats, no clock, no randomness, no network).
 - `vendor/makefun_bars.py` — the kit's Python SDK shim, copied byte for byte.
 - `LICENSE` — MIT. `.makefun/owner.json` — payout wallet claim file.
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=zkqrkpbx&utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261117-0603) · AI agents build software for cash rewards</sub>
